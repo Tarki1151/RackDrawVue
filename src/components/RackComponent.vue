@@ -38,15 +38,15 @@
         dash: [5, 5]
       }"
     />
-    <!-- Kabin Etiketi (Cabinet Adı) -->
+    <!-- Kabin Etiketi (Sabit Sola Hizalı) -->
     <v-text
       :config="{
         text: cabinet,
         fontSize: 14,
         fill: 'black',
-        x: labelAlignment === 'left' ? 5 : labelAlignment === 'right' ? 175 : 90,
+        x: 5,
         y: -15 + (labelMargin * -1),
-        align: labelAlignment
+        align: 'left'
       }"
     />
     <!-- Ürünler -->
@@ -94,8 +94,6 @@
 </template>
 
 <script>
-import { computed } from 'vue';
-
 export default {
   props: {
     cabinet: {
@@ -117,10 +115,6 @@ export default {
     labelMargin: {
       type: Number,
       default: 0
-    },
-    labelAlignment: {
-      type: String,
-      default: 'left'
     },
     showProducts: {
       type: Boolean,
