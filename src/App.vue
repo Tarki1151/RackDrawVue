@@ -1,26 +1,25 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <router-view />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { provide, ref, computed } from 'vue';
+import translations from './translations';
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
+  setup() {
+    const language = ref('tr');
+    const t = computed(() => translations[language.value]);
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+    provide('language', language);
+    provide('t', t);
+
+    const changeLanguage = (newLang) => {
+      language.value = newLang;
+    };
+    provide('changeLanguage', changeLanguage);
+
+    return { language, t };
+  }
+};
+</script>
