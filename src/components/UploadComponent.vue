@@ -1,14 +1,13 @@
 <template>
-  <div class="upload-component">
-    <input type="file" accept=".xlsx, .xls" @change="handleFileChange" />
-    <button @click="uploadFile">{{ t.upload_button }}</button>
-    <div v-if="errors" style="color: red">{{ errors }}</div>
+  <div class="upload-container">
+    <input type="file" @change="handleFileUpload" accept=".xlsx, .xls" />
+    <div v-if="errors && errors.upload" class="error-message">
+      {{ errors.upload }}
+    </div>
   </div>
 </template>
 
 <script>
-import { useLanguage } from '../context/LanguageContext';
-
 export default {
   props: {
     errors: {
@@ -18,27 +17,24 @@ export default {
   },
   emits: ['file-uploaded'],
   setup(props, { emit }) {
-    const { t } = useLanguage();
-
-    const handleFileChange = (event) => {
+    const handleFileUpload = (event) => {
       const file = event.target.files[0];
-      emit('file-uploaded', file);
+      if (file) {
+        emit('file-uploaded', file);
+      }
     };
 
-    const uploadFile = () => {
-      emit('file-uploaded', null);
-    };
-
-    return { t, handleFileChange, uploadFile };
+    return { handleFileUpload };
   }
 };
 </script>
 
 <style scoped>
-.upload-component {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.upload-container {
   margin-bottom: 20px;
+}
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="app-content">
-      <h1>{{ t.app_title }}</h1>
+      <h1>Kabin Yerleşim Uygulaması</h1>
       <UploadComponent @file-uploaded="uploadFile" :errors="errors" />
       <div class="language-selector">
         <label for="language">Dil / Language: </label>
@@ -12,32 +12,32 @@
       </div>
       <div class="options-container">
         <div class="option">
-          <label for="gridSize">{{ t.app_snap_to_grid }}</label>
+          <label for="gridSize">Izgaraya Yapış</label>
           <select id="gridSize" v-model="gridSize" @change="handleGridChange">
-            <option :value="0">{{ t.app_no_grid }}</option>
+            <option :value="0">Izgarasız</option>
             <option :value="10">10x10</option>
             <option :value="20">20x20</option>
           </select>
         </div>
         <div class="option">
-          <label for="labelMargin">{{ t.app_label_margin }}</label>
+          <label for="labelMargin">Etiket Boşluğu</label>
           <select id="labelMargin" v-model="labelMargin" @change="handleMarginChange">
-            <option :value="0">{{ t.app_label_margin_0 }}</option>
-            <option :value="5">{{ t.app_label_margin_5 }}</option>
-            <option :value="10">{{ t.app_label_margin_10 }}</option>
-            <option :value="15">{{ t.app_label_margin_15 }}</option>
+            <option :value="0">0 px</option>
+            <option :value="5">5 px</option>
+            <option :value="10">10 px</option>
+            <option :value="15">15 px</option>
           </select>
         </div>
       </div>
       <div class="button-container">
         <router-link to="/">
-          <button class="help-button">{{ t.app_help_button }}</button>
+          <button class="help-button">Yardım</button>
         </router-link>
-        <button @click="handleZoomIn">{{ t.app_zoom_in }}</button>
-        <button @click="handleZoomOut">{{ t.app_zoom_out }}</button>
-        <button @click="exportToPNG">{{ t.app_export_png }}</button>
-        <button @click="exportToSVG">{{ t.app_export_svg }}</button>
-        <button @click="exportToPDF">{{ t.app_export_pdf }}</button>
+        <button @click="handleZoomIn">Yakınlaştır</button>
+        <button @click="handleZoomOut">Uzaklaştır</button>
+        <button @click="exportToPNG">PNG Olarak Dışa Aktar</button>
+        <button @click="exportToSVG">SVG Olarak Dışa Aktar</button>
+        <button @click="exportToPDF">PDF Olarak Dışa Aktar</button>
       </div>
       <v-stage v-if="Object.keys(cabinets).length > 0" ref="stage" :config="stageConfig">
         <v-layer>
@@ -51,18 +51,20 @@
             @drag-end="handleDragEnd"
             :grid-size="gridSize"
             :label-margin="labelMargin"
+            :label-alignment="labelAlignment"
             :show-products="true"
           />
         </v-layer>
       </v-stage>
-      <div v-else>Excel dosyasını yükleyin...</div>
+      <div v-else class="welcome-message">
+        <p>Excel dosyasını yükleyin...</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { useLanguage } from '../context/LanguageContext';
+import { ref, onMounted, onUnmounted } from 'vue';
 import UploadComponent from './UploadComponent.vue';
 import RackComponent from './RackComponent.vue';
 import jsPDF from 'jspdf';
@@ -72,26 +74,21 @@ export default {
   name: 'MainApp',
   components: { UploadComponent, RackComponent },
   setup() {
-    const { language, t, changeLanguage } = useLanguage();
     const cabinets = ref({}); // Kabin verileri
     const positions = ref({}); // Kabin pozisyonları
     const file = ref(null); // Yüklenen dosya
     const errors = ref(null); // Hata mesajları
     const gridSize = ref(10); // Grid boyutu
     const labelMargin = ref(0); // Etiket boşluğu
+    const labelAlignment = ref('left'); // Etiket hizalaması
     const zoomLevel = ref(1); // Yakınlaştırma seviyesi
     const stage = ref(null); // v-stage referansı
     const stageConfig = ref({ width: 0, height: 0, scaleX: 1, scaleY: 1 }); // Sahne yapılandırması
-
-    // Dinamik genişlik hesapla
-    const dynamicWidth = computed(() => {
-      const cabinetCount = Object.keys(cabinets.value).length;
-      return Math.max(window.innerWidth, cabinetCount * 200); // Minimum ekran genişliği, maksimum kabin sayısına göre
-    });
+    const language = ref('tr'); // Dil state'i
 
     onMounted(() => {
       stageConfig.value = {
-        width: dynamicWidth.value,
+        width: window.innerWidth,
         height: window.innerHeight,
         scaleX: zoomLevel.value,
         scaleY: zoomLevel.value
@@ -99,7 +96,7 @@ export default {
 
       const handleResize = () => {
         stageConfig.value = {
-          width: dynamicWidth.value,
+          width: window.innerWidth,
           height: window.innerHeight,
           scaleX: zoomLevel.value,
           scaleY: zoomLevel.value
@@ -154,7 +151,6 @@ export default {
             return acc;
           }, {});
           positions.value = initialPositions;
-          stageConfig.value.width = dynamicWidth.value; // Kabin sayısına göre genişlik güncelle
           console.log('Parsed Cabinets:', parsedCabinets); // Debug
         };
         reader.onerror = () => {
@@ -169,7 +165,7 @@ export default {
 
     const handleDragMove = (e, gridSizeValue) => {
       const newX = gridSizeValue > 0 ? Math.round(e.target.x() / gridSizeValue) * gridSizeValue : e.target.x();
-      const newY = gridSizeValue > 0 ? Math.round(e.target.y() / props.gridSize) * props.gridSize : e.target.y();
+      const newY = gridSizeValue > 0 ? Math.round(e.target.y() / gridSizeValue) * gridSizeValue : e.target.y();
       e.target.x(newX);
       e.target.y(newY);
     };
@@ -230,20 +226,22 @@ export default {
       pdf.save('rack-diagram.pdf');
     };
 
+    const changeLanguage = (lang) => {
+      language.value = lang; // Dil state'ini güncelle
+    };
+
     return {
-      language,
-      t,
-      changeLanguage,
       cabinets,
       positions,
       file,
       errors,
       gridSize,
       labelMargin,
+      labelAlignment,
       zoomLevel,
       stage,
       stageConfig,
-      dynamicWidth,
+      language, // language state'ini return et
       uploadFile,
       handleDragMove,
       handleDragEnd,
@@ -253,7 +251,8 @@ export default {
       handleZoomOut,
       exportToPNG,
       exportToSVG,
-      exportToPDF
+      exportToPDF,
+      changeLanguage // changeLanguage fonksiyonunu return et
     };
   }
 };
@@ -302,5 +301,11 @@ button {
 }
 button:hover {
   background-color: #0056b3;
+}
+.welcome-message {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 18px;
+  color: #333;
 }
 </style>

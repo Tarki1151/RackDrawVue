@@ -38,15 +38,15 @@
         dash: [5, 5]
       }"
     />
-    <!-- Kabin Etiketi (Sabit Sola Hizalı) -->
+    <!-- Kabin Etiketi (Cabinet Adı) -->
     <v-text
       :config="{
         text: cabinet,
         fontSize: 14,
         fill: 'black',
-        x: 5,
+        x: labelAlignment === 'left' ? 5 : labelAlignment === 'right' ? 175 : 90,
         y: -15 + (labelMargin * -1),
-        align: 'left'
+        align: labelAlignment
       }"
     />
     <!-- Ürünler -->
@@ -115,6 +115,10 @@ export default {
     labelMargin: {
       type: Number,
       default: 0
+    },
+    labelAlignment: {
+      type: String,
+      default: 'left'
     },
     showProducts: {
       type: Boolean,
